@@ -16,28 +16,20 @@ if frames > time_steps:
     frames = time_steps
 x_resolution = 0.5
 y_resolution = 0.5
-conductivity = 1
+thermal_diffusivity = 1
 
 x = np.arange(0, 100, step=x_resolution)
 y = np.arange(0, 100, step=y_resolution)
-heatmap = np.zeros((len(x), len(y)))
-heatmap[:, 0:1] = np.ones((len(x), 1))
-heatmap[:, len(y) - 1 : len(y)] = np.zeros((len(x), 1))
-heatmap[0:1, :] = np.ones((1, len(y)))
-heatmap[len(x) - 1 : len(x), :] = np.zeros((1, len(y)))
+heatmap = np.ones((len(x), len(y))) * 9
+heatmap[:, 0:1] = np.ones((len(x), 1)) * 10
+heatmap[:, len(y) - 1 : len(y)] = np.ones((len(x), 1)) * 9
+heatmap[0:1, :] = np.ones((1, len(y))) * 10
+heatmap[len(x) - 1 : len(x), :] = np.ones((1, len(y))) * 9
 state = np.zeros((frames, len(x), len(y)))
 heatmap_derivative2_x = np.zeros_like(heatmap)
 heatmap_derivative2_y = np.zeros_like(heatmap)
 xx_derivative = np.zeros((len(x), len(y)))
 yy_derivative = np.zeros((len(x), len(y)))
-
-
-def compute_derivative_x(i, j, function, x_diff):
-    return (function[i + 1, j] - 2 * function[i, j] + function[i - 1, j]) / x_diff**2
-
-
-def compute_derivative_y(i, j, function, y_diff):
-    return (function[i, j + 1] - 2 * function[i, j] + function[i, j - 1]) / y_diff**2
 
 
 # Create meshgrid for indexing
@@ -60,7 +52,7 @@ for k in range(time_steps):
     # Update heatmap
     heatmap += (
         time_resolution
-        * conductivity
+        * thermal_diffusivity
         * (heatmap_derivative2_x.T + heatmap_derivative2_y.T)
     )
 
@@ -75,7 +67,6 @@ endtime = time.time()
 time_taken = endtime - starttime
 print(f"Time taken for simulation: {time_taken}")
 
-# Set up the figure and axis
 fig, ax = plt.subplots()
 
 
@@ -97,7 +88,6 @@ ani = animation.FuncAnimation(
     fig, update, frames=range(frames), blit=True, repeat=True, interval=interval
 )
 
-# Set labels and title
 ax.set_title("Animated Heatmap")
 ax.set_xlabel("X axis")
 ax.set_ylabel("Y axis")
